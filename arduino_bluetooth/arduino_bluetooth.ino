@@ -2,8 +2,8 @@
 #include <ArduinoBLE.h>
 
 BLEClient bleClient;
-BLEService gpsService("service-UUID"); // Replace with service UUID !!
-BLECharacteristic gpsCharacteristic("characteristic-UUID", BLERead | BLENotify); // Replace with characteristic UUID !!
+BLEService gpsService("b83bbcfe-d51f-44c2-b127-99cba4b8d647");
+BLECharacteristic gpsCharacteristic("77e405f4-0f06-40c3-9cfb-c17fbaacc313", BLERead | BLENotify);
 
 void setup() {
   Serial.begin(115200);
