@@ -45,7 +45,7 @@ void loop() {
 }
 
 String getGPSData() {
-  // Replace this with actual code to read from the HM-10 module
+  // Replace this with actual code to read from the GPS
   String gpsData = "Latitude: 37.7749, Longitude: -122.4194"; // Example GPS data
   return gpsData;
 }
