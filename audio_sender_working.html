@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyword Recognition</title>
+  <style>
+    /* Reset styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+
+    /* Container styling */
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #007bff;
+    }
+
+    /* Button styling */
+    .button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Status and Keyword styling */
+    .status, .recognized-keyword {
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+
+    .status span, .recognized-keyword span {
+      font-weight: bold;
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Keyword Recognition</h1>
+    <button class="button" onclick="startListening()">Start Listening</button>
+    <button class="button" onclick="stopListening()">Stop Listening</button>
+    <p class="status">Status: <span id="status">Not Listening</span></p>
+    <p class="recognized-keyword">Recognized Keyword: <span id="recognizedKeyword">None</span></p>
+  </div>
+
+  <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.continuous = true;
+
+    const keywords = {
+      forward: '/on',
+      reverse: '/backward',
+      stop: '/off',
+      left: '/left',
+      right: '/right',
+      fast: '/fast',
+      slow: '/slow'
+    };
+
+    const arduinoIP = 'http://172.20.10.14'; // Replace with Arduino's IP address
+
+    function startListening() {
+      document.getElementById('status').innerText = "Listening...";
+      recognition.start();
+    }
+
+    function stopListening() {
+      document.getElementById('status').innerText = "Not Listening";
+      recognition.stop();
+    }
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      console.log('Heard:', transcript);
+
+      let recognizedKeyword = "None";
+      for (const keyword in keywords) {
+        if (transcript.includes(keyword)) {
+          recognizedKeyword = keyword;
+          const url = arduinoIP + keywords[keyword];
+          console.log(`Fetching URL: ${url}`);
+
+          fetch(url, { mode: 'no-cors' })
+            .then(response => console.log(`Sent command: ${keywords[keyword]}`))
+            .catch(error => console.error('Error sending command:', error));
+          break;
+        }
+      }
+
+      document.getElementById('recognizedKeyword').innerText = recognizedKeyword;
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      document.getElementById('status').innerText = "Error occurred";
+    };
+
+    recognition.onend = () => {
+      document.getElementById('status').innerText = "Not Listening";
+    };
+  </script>
+</body>
+</html>
