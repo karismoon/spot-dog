@@ -15,7 +15,6 @@ int motorSpeed = 50;  // Variable to store the motor speed from the slider
 const int maxSpeed = 255;
 const int minSpeed = 0;
 
-
 char ssid[] = "iPhone (1793)"; // Enter your WIFI SSID
 char pass[] = "yeehawhawyee";  // Enter your WIFI password
 
@@ -65,22 +64,21 @@ void webServer() {
         if (c == '\n') {
           if (currentLine.length() == 0) {
             client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
+            client.println("Content-type:text/plain");
             client.println("Connection: close");
             client.println();
 
+            // Check and execute commands based on audio recognition keywords
             if (header.indexOf("GET /on") >= 0) {
               forward();
             } else if (header.indexOf("GET /off") >= 0) {
               stop();
-            } else if (header.indexOf("GET /spin") >= 0) {
-              spin();
-            } else if (header.indexOf("GET /stopspin") >= 0) {
-              stop_spin();
-            } else if (header.indexOf("GET /speed/increase") >= 0) {
-              increaseSpeed();
-            } else if (header.indexOf("GET /speed/decrease") >= 0) {
-              decreaseSpeed();
+            } else if (header.indexOf("GET /backward") >= 0) {
+              backward();
+            } else if (header.indexOf("GET /left") >= 0) {
+              turnLeft();
+            } else if (header.indexOf("GET /right") >= 0) {
+              turnRight();
             }
 
             int speedIndex = header.indexOf("GET /speed/");
@@ -90,42 +88,8 @@ void webServer() {
               setSpeed(newSpeed);
             }
 
-            client.println("<!DOCTYPE html><html>");
-            client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-            client.println("<style>html { font-family: Helvetica; text-align: center;}");
-            client.println(".button { padding: 16px 40px; border-radius: 20px; font-size: 30px; cursor: pointer;}");
-            client.println(".on { background-color: #FF0000; color: white; }");
-            client.println(".off { background-color: #000000; color: white; }");
-            client.println(".spin { background-color: #4CAF50; color: white; }");
-            client.println(".stopspin { background-color: #FFA500; color: white; }</style></head>");
-
-            client.println("<body><h1>PIE Project HTML Test Site</h1>");
-            client.println("<p>Click to Start, Stop, Spin, or Stop Spin</p>");
-            
-            if (output == "on") {
-              client.println("<p><a href=\"/off\"><button class=\"button on\">Stop</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/on\"><button class=\"button off\">Forward</button></a></p>");
-            }
-
-            if (output == "spin") {
-              client.println("<p><a href=\"/stopspin\"><button class=\"button stopspin\">Stop Spin</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/spin\"><button class=\"button spin\">Spin</button></a></p>");
-            }
-
-            client.println("<h2>Motor Speed Control</h2>");
-            client.println("<input type=\"range\" min=\"0\" max=\"255\" value=\"" + String(motorSpeed) + "\" class=\"slider\" id=\"speedRange\" onchange=\"updateSpeed(this.value)\">");
-            client.println("<p>Speed: <span id=\"speedValue\">" + String(motorSpeed) + "</span></p>");
-
-            client.println("<script>");
-            client.println("function updateSpeed(val) {");
-            client.println("  fetch('/speed/' + val);");
-            client.println("  document.getElementById('speedValue').innerText = val;");
-            client.println("}");
-            client.println("</script>");
-
-            client.println("</body></html>");
+            // Send acknowledgment to the client
+            client.println("Command received and processed.");
             client.println();
             break;
           } else {
@@ -150,40 +114,46 @@ void setSpeed(int speed) {
   }
 }
 
+void backward() {
+  output = "on";
+  Motor1->run(BACKWARD);
+  Motor2->run(BACKWARD);
+  Motor3->run(BACKWARD);
+  Motor4->run(BACKWARD);
+  setSpeed(100);
+}
+
+void turnLeft() {
+  output = "on";
+  Motor1->run(BACKWARD);
+  Motor2->run(FORWARD);
+  Motor3->run(FORWARD);
+  Motor4->run(BACKWARD);
+  setSpeed(100);
+}
+
+void turnRight() {
+  output = "on";
+  Motor1->run(FORWARD);
+  Motor2->run(BACKWARD);
+  Motor3->run(BACKWARD);
+  Motor4->run(FORWARD);
+  setSpeed(100);
+}
 
 void forward() {
-  if (output == "spin") {
-    stop_spin();  // Stop spin if currently active
-  }
   output = "on";
-  setSpeed(motorSpeed);
+  Motor1->run(FORWARD);
+  Motor2->run(FORWARD);
+  Motor3->run(FORWARD);
+  Motor4->run(FORWARD);
+  setSpeed(100);
 }
 
 void stop() {
+  setSpeed(0);
   output = "off";
-  Motor1->setSpeed(0);
-  Motor2->setSpeed(0);
-  Motor3->setSpeed(0);
-  Motor4->setSpeed(0);
 }
-
-void spin() {
-  if (output == "on") {
-    stop();  // Stop forward motion if currently active
-  }
-  output = "spin";
-  Motor2->run(BACKWARD);
-  Motor3->run(BACKWARD);
-  setSpeed(motorSpeed);
-}
-
-void stop_spin() {
-  Motor2->run(FORWARD);
-  Motor3->run(FORWARD);
-  output = "off";
-  stop();
-}
-
 
 void printWifiStatus() {
   Serial.print("SSID: ");
