@@ -11,7 +11,10 @@ Adafruit_DCMotor *Motor2 = AFMS.getMotor(2);
 Adafruit_DCMotor *Motor3 = AFMS.getMotor(3);
 Adafruit_DCMotor *Motor4 = AFMS.getMotor(4);
 
-int motorSpeed = 0;  // Variable to store the motor speed from the slider
+int motorSpeed = 50;  // Variable to store the motor speed from the slider
+const int maxSpeed = 255;
+const int minSpeed = 0;
+
 
 char ssid[] = "iPhone (1793)"; // Enter your WIFI SSID
 char pass[] = "yeehawhawyee";  // Enter your WIFI password
@@ -74,6 +77,10 @@ void webServer() {
               spin();
             } else if (header.indexOf("GET /stopspin") >= 0) {
               stop_spin();
+            } else if (header.indexOf("GET /speed/increase") >= 0) {
+              increaseSpeed();
+            } else if (header.indexOf("GET /speed/decrease") >= 0) {
+              decreaseSpeed();
             }
 
             int speedIndex = header.indexOf("GET /speed/");
@@ -134,6 +141,16 @@ void webServer() {
   }
 }
 
+void setSpeed(int speed) {
+  if (output == "on" || output == "spin") {
+    Motor1->setSpeed(speed);
+    Motor2->setSpeed(speed);
+    Motor3->setSpeed(speed);
+    Motor4->setSpeed(speed);
+  }
+}
+
+
 void forward() {
   if (output == "spin") {
     stop_spin();  // Stop spin if currently active
@@ -167,14 +184,6 @@ void stop_spin() {
   stop();
 }
 
-void setSpeed(int speed) {
-  if (output == "on" || output == "spin") {
-    Motor1->setSpeed(speed);
-    Motor2->setSpeed(speed);
-    Motor3->setSpeed(speed);
-    Motor4->setSpeed(speed);
-  }
-}
 
 void printWifiStatus() {
   Serial.print("SSID: ");
@@ -184,4 +193,14 @@ void printWifiStatus() {
   Serial.println(ip);
   Serial.print("Now open this URL on your browser --> http://");
   Serial.println(ip);
+}
+
+void fast() {
+  motorSpeed = 150;
+  setSpeed(motorSpeed);
+}
+
+void slow() {
+  motorSpeed = 50;
+  setSpeed(motorSpeed);
 }
