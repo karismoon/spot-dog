@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include <ArduinoBLE.h>
 
-BLEClient bleClient;
 BLEService gpsService("b83bbcfe-d51f-44c2-b127-99cba4b8d647");
-BLECharacteristic gpsCharacteristic("77e405f4-0f06-40c3-9cfb-c17fbaacc313", BLERead | BLENotify);
+BLECharacteristic gpsCharacteristic("77e405f4-0f06-40c3-9cfb-c17fbaacc313", BLERead | BLENotify, 32);
 
 void setup() {
   Serial.begin(115200);
@@ -20,7 +19,7 @@ void setup() {
 }
 
 void loop() {
-  peripheral = BLE.available(); // Check if the peripheral is available
+  BLEDevice peripheral = BLE.available(); // Check if the peripheral is available
 
   if (peripheral) {
     Serial.print("Found device: ");
@@ -36,18 +35,15 @@ void loop() {
       if (gpsChar) {
         while (peripheral.connected()) {
           if (gpsChar.valueUpdated()) { // Check if new data is available
-            String gpsData = gpsChar.value();
+            // char gpsData[] = gpsChar.readValue(sizeof(gpsChar));
             Serial.print("Received GPS Data: ");
-            Serial.println(gpsData);
+            Serial.println(gpsChar);
           }
-          delay(500); // Wait before collecting data
+          delay(500); // Wait before collecting data again
         }
       } else {
         Serial.println("GPS Characteristic not found!");
       }
-
-      Serial.println("Disconnected from Peripheral");
-      peripheral.disconnect();
     } else {
       Serial.println("Failed to connect!");
     }

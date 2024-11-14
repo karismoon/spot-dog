@@ -1,7 +1,7 @@
 #include <ArduinoBLE.h>
 
 BLEService gpsService(" b83bbcfe-d51f-44c2-b127-99cba4b8d647");
-BLEStringCharacteristic gpsCharacteristic(" 77e405f4-0f06-40c3-9cfb-c17fbaacc313", BLERead | BLENotify, 32);
+BLEStringCharacteristic gpsCharacteristic("77e405f4-0f06-40c3-9cfb-c17fbaacc313", BLERead | BLENotify, 32);
 
 void setup() {
   Serial.begin(9600);
