@@ -6,6 +6,7 @@ BLEStringCharacteristic gpsCharacteristic(" 77e405f4-0f06-40c3-9cfb-c17fbaacc313
 void setup() {
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to initialize
+  Serial.println("Serial monitor initialized");
 
   // Start BLE
   if (!BLE.begin()) {
