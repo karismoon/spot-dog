@@ -80,6 +80,9 @@ void webServer() {
             } else if (header.indexOf("GET /right") >= 0) {
               turnRight();
             }
+            else if (header.indexOf("GET /heel") >= 0) {
+              heel(); // Call the heel function
+            }
 
             int speedIndex = header.indexOf("GET /speed/");
             if (speedIndex >= 0) {
@@ -105,6 +108,16 @@ void webServer() {
   }
 }
 
+void heel() {
+  int targetRSSI = -49; // Adjust as needed for proximity
+  output = "heel";
+  while (WiFi.RSSI() < targetRSSI) {
+    forward(); // Adjust speed if needed
+    delay(100);       // Brief pause to prevent constant checking
+  }
+  stop(); // Stop when the target RSSI is reached
+}
+
 void setSpeed(int speed) {
   if (output == "on" || output == "spin") {
     Motor1->setSpeed(speed);
@@ -120,7 +133,7 @@ void backward() {
   Motor2->run(BACKWARD);
   Motor3->run(BACKWARD);
   Motor4->run(BACKWARD);
-  setSpeed(100);
+  setSpeed(50);
 }
 
 void turnLeft() {
@@ -129,7 +142,7 @@ void turnLeft() {
   Motor2->run(FORWARD);
   Motor3->run(FORWARD);
   Motor4->run(BACKWARD);
-  setSpeed(100);
+  setSpeed(50);
 }
 
 void turnRight() {
@@ -138,7 +151,7 @@ void turnRight() {
   Motor2->run(BACKWARD);
   Motor3->run(BACKWARD);
   Motor4->run(FORWARD);
-  setSpeed(100);
+  setSpeed(50);
 }
 
 void forward() {
@@ -147,7 +160,7 @@ void forward() {
   Motor2->run(FORWARD);
   Motor3->run(FORWARD);
   Motor4->run(FORWARD);
-  setSpeed(100);
+  setSpeed(50);
 }
 
 void stop() {
