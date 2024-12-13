@@ -1,5 +1,6 @@
 #include "WiFiS3.h"
 #include <Adafruit_MotorShield.h>
+#include <Servo.h>
 
 #define relay 2
 
@@ -10,6 +11,12 @@ Adafruit_DCMotor *Motor1 = AFMS.getMotor(1);
 Adafruit_DCMotor *Motor2 = AFMS.getMotor(2);
 Adafruit_DCMotor *Motor3 = AFMS.getMotor(3);
 Adafruit_DCMotor *Motor4 = AFMS.getMotor(4);
+
+Servo myservofrontright;
+Servo myservofrontleft;
+Servo myservobackleft;
+Servo myservobackright;
+Servo myservoneck;
 
 int motorSpeed = 50;  // Variable to store the motor speed from the slider
 const int maxSpeed = 255;
@@ -44,6 +51,13 @@ void setup() {
   Motor2->run(FORWARD);
   Motor3->run(FORWARD);
   Motor4->run(FORWARD);
+
+  myservobackright.attach(0);
+  myservobackleft.attach(1);
+  myservofrontright.attach(2);
+  myservofrontleft.attach(3);
+  //myservoneck.attach(4);
+  stand();
 }
 
 void loop() {
@@ -58,16 +72,17 @@ void webServer() {
     previousTime = currentTime;
     while (client.connected() && currentTime - previousTime <= timeoutTime) {
       currentTime = millis();
+
       if (client.available()) {
         char c = client.read();
         header += c;
         if (c == '\n') {
+          stand();
           if (currentLine.length() == 0) {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/plain");
             client.println("Connection: close");
             client.println();
-
             // Check and execute commands based on audio recognition keywords
             if (header.indexOf("GET /on") >= 0) {
               forward();
@@ -82,6 +97,18 @@ void webServer() {
             }
             else if (header.indexOf("GET /heel") >= 0) {
               heel(); // Call the heel function
+            }
+            else if (header.indexOf("GET /paw") >= 0) {
+              paw();
+            }
+            else if (header.indexOf("GET /hail") >= 0) {
+              hail();
+            }
+            else if (header.indexOf("GET /sit") >= 0) {
+              sit();
+            }
+            else if (header.indexOf("GET /lay") >= 0) {
+              lay();
             }
 
             int speedIndex = header.indexOf("GET /speed/");
@@ -178,12 +205,88 @@ void printWifiStatus() {
   Serial.println(ip);
 }
 
-void fast() {
-  motorSpeed = 150;
-  setSpeed(motorSpeed);
+void stand(){
+  myservobackleft.write(90);
+  myservobackright.write(90);
+  myservofrontleft.write(90);
+  myservofrontright.write(90);
 }
 
-void slow() {
-  motorSpeed = 50;
-  setSpeed(motorSpeed);
+void paw(){
+  for (int pos = 90; pos >= 1; pos--) {
+    myservofrontright.write(pos);    // Back left motor
+    myservobackleft.write(75);
+    myservobackright.write(105);
+    myservofrontleft.write(90);
+    delay(20);                     // Delay for smooth movement
+  }
+
+  delay(5000);
+  
+  for (int pos = 1; pos <= 90; pos++) {
+    myservofrontright.write(pos);
+    myservobackleft.write(75);
+    myservobackright.write(105);
+    myservofrontleft.write(90);
+    delay(20);                     // Delay for smooth movement
+  }
+}
+
+// Function to perform the servo movements
+void sit() {
+  // Back motors: Step from 90 to 20 and 90 to 160, then back
+  for (int pos = 90; pos >= 40; pos--) {
+    myservobackleft.write(pos);    // Back left motor
+    myservobackright.write(90 + (90-pos)); // Back right motor
+    delay(20);                     // Delay for smooth movement
+  }
+
+  delay(2000);
+  
+  for (int pos = 40; pos <= 90; pos++) {
+    myservobackleft.write(pos);    // Back left motor
+    myservobackright.write(90 + (90 - pos)); // Back right motor
+    delay(20);                     // Delay for smooth movement
+  }
+}
+
+void lay() {
+  // Back motors: Step from 90 to 20 and 90 to 160, then back
+  for (int pos = 90; pos <= 170; pos++) {
+    myservobackleft.write(pos);    // Back left motor
+    myservobackright.write(90 + (90-pos)); // Back right motor
+    myservofrontright.write(90 + (90 - pos));
+    myservofrontleft.write(pos);
+    delay(20);                     // Delay for smooth movement
+  }
+
+  delay(2000);
+  
+  for (int pos = 170; pos >= 90; pos--) {
+    myservobackleft.write(pos);    // Back left motor
+    myservobackright.write(90 + (90 - pos)); // Back right motor
+    myservofrontright.write(90 + (90 - pos));
+    myservofrontleft.write(pos);
+    delay(20);                     // Delay for smooth movement
+  }
+}
+
+void hail(){
+  for (int pos = 90; pos <= 179; pos++) {
+    myservofrontright.write(90);    // Back left motor
+    myservobackleft.write(75);
+    myservobackright.write(105);
+    myservofrontleft.write(pos);
+    delay(15);                     // Delay for smooth movement
+  }
+
+  delay(5000);
+  
+  for (int pos = 179; pos >= 90; pos--) {
+    myservofrontright.write(90);
+    myservobackleft.write(75);
+    myservobackright.write(105);
+    myservofrontleft.write(pos);
+    delay(15);                     // Delay for smooth movement
+  }
 }
