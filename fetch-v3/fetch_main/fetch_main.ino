@@ -52,6 +52,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("No ball");
   // Turn in small increments until the ball is detected
   if (detectBall() > 0 && detectBall() < maxDistance) {
     Serial.println("Ball detected!");
@@ -69,6 +70,7 @@ void loop() {
 void turn() {
   Serial.println("Turning right");
   
+  speedSet(motorSpeed);
   Motor1->run(FORWARD);
   Motor2->run(BACKWARD);
   Motor3->run(BACKWARD);
@@ -92,11 +94,11 @@ int detectBall() {
   Serial.print("Distance: ");
   Serial.println(distance);
   
-  return distance
+  return distance;
 }
 
 // Function to set speed of all motors
-void setSpeed(int speed) {
+void speedSet(int speed) {
   Motor1->setSpeed(speed);
   Motor2->setSpeed(speed);
   Motor3->setSpeed(speed);
@@ -105,7 +107,7 @@ void setSpeed(int speed) {
 
 // Function to stop all motor movement
 void stopMovement() {
-  setSpeed(0);
+  speedSet(0);
 }
 
 // Function to move the robot towards the ball
@@ -114,7 +116,7 @@ void moveTowardsBall() {
   lay();
   
   while (detectBall() > fetchDistance) {
-    setSpeed(motorSpeed);
+    speedSet(motorSpeed);
 
     Motor1->run(FORWARD);
     Motor2->run(FORWARD);
@@ -126,8 +128,9 @@ void moveTowardsBall() {
   stopMovement();
 }
 
-// Function to make the robot stand (placeholder for user-specific implementation)
+// Function to make the robot stand
 void stand() {
+  stopMovement();
   myservobackleft.write(90);
   myservobackright.write(90);
   myservofrontleft.write(90);
