@@ -14,6 +14,7 @@ Servo myservofrontleft;
 Servo myservobackleft;
 Servo myservobackright;
 Servo myservoneck;
+Servo myservojaw;
 
 int motorSpeed = 50;  // Variable to store the motor speed from the slider
 int fetchDistance = 10; // Distance from ball to sensor needed for fetch
@@ -43,8 +44,11 @@ void setup() {
   myservobackleft.attach(1);
   myservofrontright.attach(2);
   myservofrontleft.attach(3);
-  //myservoneck.attach(4);
+  myservoneck.attach(4);
+  myservojaw.attach(9);
   stand();
+
+  // stayLaying();
 
   // Ultrasonic sensor initialization
   pinMode(trigPin, OUTPUT);
@@ -52,18 +56,28 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("No ball");
-  // Turn in small increments until the ball is detected
-  if (detectBall() > 0 && detectBall() < maxDistance) {
-    Serial.println("Ball detected!");
-    stopMovement();
-    moveTowardsBall();
-  } else {
-    stand();
-    turn();
-    lay();
-  }
-  delay(100); // Small delay to avoid excessive sensor reads
+  // Serial.println("No ball");
+  // // Turn in small increments until the ball is detected
+  // if (detectBall() > 0 && detectBall() < maxDistance) {
+  //   Serial.println("Ball detected!");
+  //   stopMovement();
+  //   moveTowardsBall();
+  // } else {
+  //   stand();
+  //   turn();
+  //   lay();
+  // }
+  // delay(100); // Small delay to avoid excessive sensor reads
+  stand();
+  myservoneck.write(90);
+  detectBall();
+}
+
+void bite() {
+  int angle = 180;
+  Serial.print("bite angle: ");
+  Serial.println(angle);
+  myservojaw.write(angle);  
 }
 
 // Function to turn the robot incrementally
@@ -113,7 +127,7 @@ void stopMovement() {
 // Function to move the robot towards the ball
 void moveTowardsBall() {
   Serial.println("Moving towards the ball...");
-  lay();
+  stayLaying();
   
   while (detectBall() > fetchDistance) {
     speedSet(motorSpeed);
@@ -156,4 +170,12 @@ void lay() {
     myservofrontleft.write(pos);
     delay(20);                     // Delay for smooth movement
   }
+}
+
+void stayLaying() {
+  int pos = 170;
+  myservobackleft.write(pos);    // Back left motor
+  myservobackright.write(90 + (90-pos)); // Back right motor
+  myservofrontright.write(90 + (90 - pos));
+  myservofrontleft.write(pos);
 }
