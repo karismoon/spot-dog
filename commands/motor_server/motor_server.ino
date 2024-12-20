@@ -18,7 +18,7 @@ Servo myservobackleft;
 Servo myservobackright;
 Servo myservoneck;
 
-int motorSpeed = 50;  // Variable to store the motor speed from the slider
+int motorSpeed = 100;  // Variable to store the motor speed from the slider
 const int maxSpeed = 255;
 const int minSpeed = 0;
 
@@ -56,8 +56,9 @@ void setup() {
   myservobackleft.attach(1);
   myservofrontright.attach(2);
   myservofrontleft.attach(3);
-  //myservoneck.attach(4);
+  myservoneck.attach(4);
   stand();
+  neck();
 }
 
 void loop() {
@@ -78,6 +79,7 @@ void webServer() {
         header += c;
         if (c == '\n') {
           stand();
+          neck();
           if (currentLine.length() == 0) {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/plain");
@@ -101,14 +103,20 @@ void webServer() {
             else if (header.indexOf("GET /paw") >= 0) {
               paw();
             }
-            else if (header.indexOf("GET /hail") >= 0) {
-              hail();
-            }
             else if (header.indexOf("GET /sit") >= 0) {
               sit();
             }
             else if (header.indexOf("GET /lay") >= 0) {
               lay();
+            }
+            else if (header.indexOf("GET /nod") >= 0) {
+              nod();
+            }
+            else if (header.indexOf("GET /lift") >= 0) {
+              lift();
+            }
+            else if (header.indexOf("GET /up") >= 0) {
+              standup();
             }
 
             int speedIndex = header.indexOf("GET /speed/");
@@ -160,7 +168,7 @@ void backward() {
   Motor2->run(BACKWARD);
   Motor3->run(BACKWARD);
   Motor4->run(BACKWARD);
-  setSpeed(50);
+  setSpeed(100);
 }
 
 void turnLeft() {
@@ -169,7 +177,7 @@ void turnLeft() {
   Motor2->run(FORWARD);
   Motor3->run(FORWARD);
   Motor4->run(BACKWARD);
-  setSpeed(50);
+  setSpeed(100);
 }
 
 void turnRight() {
@@ -178,7 +186,7 @@ void turnRight() {
   Motor2->run(BACKWARD);
   Motor3->run(BACKWARD);
   Motor4->run(FORWARD);
-  setSpeed(50);
+  setSpeed(100);
 }
 
 void forward() {
@@ -187,7 +195,7 @@ void forward() {
   Motor2->run(FORWARD);
   Motor3->run(FORWARD);
   Motor4->run(FORWARD);
-  setSpeed(50);
+  setSpeed(100);
 }
 
 void stop() {
@@ -210,6 +218,10 @@ void stand(){
   myservobackright.write(90);
   myservofrontleft.write(90);
   myservofrontright.write(90);
+}
+
+void neck(){
+  myservoneck.write(90);
 }
 
 void paw(){
@@ -235,17 +247,22 @@ void paw(){
 // Function to perform the servo movements
 void sit() {
   // Back motors: Step from 90 to 20 and 90 to 160, then back
-  for (int pos = 90; pos >= 40; pos--) {
+  for (int pos = 90; pos >= 30; pos--) {
     myservobackleft.write(pos);    // Back left motor
     myservobackright.write(90 + (90-pos)); // Back right motor
+    myservofrontright.write(130);
+    myservofrontleft.write(50);
+    myservoneck.write(110);
     delay(20);                     // Delay for smooth movement
   }
 
-  delay(2000);
+  delay(10000);
   
-  for (int pos = 40; pos <= 90; pos++) {
+  for (int pos = 30; pos <= 90; pos++) {
     myservobackleft.write(pos);    // Back left motor
     myservobackright.write(90 + (90 - pos)); // Back right motor
+    myservofrontright.write(90);
+    myservofrontleft.write(90);
     delay(20);                     // Delay for smooth movement
   }
 }
@@ -259,10 +276,10 @@ void lay() {
     myservofrontleft.write(pos);
     delay(20);                     // Delay for smooth movement
   }
+}
 
-  delay(2000);
-  
-  for (int pos = 170; pos >= 90; pos--) {
+void standup(){
+    for (int pos = 170; pos >= 90; pos--) {
     myservobackleft.write(pos);    // Back left motor
     myservobackright.write(90 + (90 - pos)); // Back right motor
     myservofrontright.write(90 + (90 - pos));
@@ -271,22 +288,28 @@ void lay() {
   }
 }
 
-void hail(){
-  for (int pos = 90; pos <= 179; pos++) {
-    myservofrontright.write(90);    // Back left motor
-    myservobackleft.write(75);
-    myservobackright.write(105);
-    myservofrontleft.write(pos);
-    delay(15);                     // Delay for smooth movement
-  }
 
-  delay(5000);
-  
-  for (int pos = 179; pos >= 90; pos--) {
-    myservofrontright.write(90);
-    myservobackleft.write(75);
-    myservobackright.write(105);
-    myservofrontleft.write(pos);
-    delay(15);                     // Delay for smooth movement
+void nod(){
+  for (int i = 0; i <= 10; i++){
+    for (int pos = 90; pos <= 130; pos++) {
+      myservoneck.write(pos);
+      delay(5);                     // Delay for smooth movement
+    }
+    for (int pos = 130; pos >= 90; pos--) {
+      myservoneck.write(pos);
+      delay(5);                     // Delay for smooth movement
+    }
+  }
+}
+
+
+void lift(){
+  for (int pos = 90; pos <= 130; pos++) {
+    myservoneck.write(pos);
+    delay(100);                     // Delay for smooth movement
+  }
+  for (int pos = 130; pos >= 90; pos--) {
+    myservoneck.write(pos);
+    delay(200);                     // Delay for smooth movement
   }
 }
